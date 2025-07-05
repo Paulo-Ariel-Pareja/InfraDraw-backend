@@ -9,6 +9,10 @@ import {
 import { Method } from '../constants/method.constants';
 
 export class EndpointDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
   @IsEnum(Method)
   method: Method;
 

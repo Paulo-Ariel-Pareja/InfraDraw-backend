@@ -42,11 +42,6 @@ export class BoardController {
     });
   }
 
-  @Get('stats')
-  findStats() {
-    return this.boardService.boardStats();
-  }
-
   @Get('public')
   findAllPublic(@Query() searchCriteria: SearchDto) {
     return this.boardService.findAllPublic(searchCriteria);
