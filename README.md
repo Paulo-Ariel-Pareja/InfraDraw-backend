@@ -33,6 +33,12 @@ Copia el archivo de ejemplo de variables de entorno y ajústalo según tus neces
 cp .example.env .env
 ```
 
+Si quieres, puedes ejecutar el frontend siguiendo los pasos del README.md del front, aqui el repositorio:
+
+```bash
+https://github.com/Paulo-Ariel-Pareja/InfraDraw-frontend
+```
+
 ## 🏃‍♂️ Ejecución
 
 ### Desarrollo
