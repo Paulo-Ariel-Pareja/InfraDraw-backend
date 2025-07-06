@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { ComponentModule } from './component/component.module';
 import { BoardModule } from './board/board.module';
 import { StatsModule } from './stats/stats.module';
+import { UserModule } from './user/user.module';
 import dbConfig from './config/db.config';
 import appConfig from './config/app.config';
 
@@ -25,6 +26,7 @@ import appConfig from './config/app.config';
     ComponentModule,
     BoardModule,
     StatsModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

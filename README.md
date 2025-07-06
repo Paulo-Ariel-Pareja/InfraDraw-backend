@@ -64,6 +64,7 @@ src/
   ├── common/
   ├── config/
   └── stats/
+  └── user/
 ```
 
 ## 📊 Endpoints principales
@@ -71,6 +72,7 @@ src/
 - `GET /api/board` — Listado de tableros
 - `GET /api/component` — Listado de componentes
 - `GET /api/stats` — Estadísticas generales
+- `POST /api/user/login` — Autenticarse
 
 ## 📝 Licencia
 
