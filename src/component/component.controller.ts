@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ComponentService } from './component.service';
 import { CreateComponentDto } from './dto/create-component.dto';
 import { UpdateComponentDto } from './dto/update-component.dto';
-import { SearchDto } from 'src/common/dto/search.dto';
+import { SearchDto } from '../common/dto/search.dto';
+import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('component')
 export class ComponentController {
   constructor(private readonly componentService: ComponentService) {}
