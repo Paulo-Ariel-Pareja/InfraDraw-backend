@@ -6,6 +6,8 @@ import {
 import { PaginateModel } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { SearchDto } from 'src/common/dto/search.dto';
@@ -13,11 +15,23 @@ import { transform } from './helper/user.helper';
 
 @Injectable()
 export class UserService {
+  superAdmin: string;
+  superAdminPassword: string;
+
   private readonly saltOrRounds = 12;
   constructor(
     @InjectModel(User.name)
     private dbUser: PaginateModel<User>,
-  ) {}
+    private jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {
+    this.superAdmin = this.configService.getOrThrow<string>(
+      'appConfig.userAdmin',
+    );
+    this.superAdminPassword = this.configService.getOrThrow<string>(
+      'appConfig.passAdmin',
+    );
+  }
 
   async create(createUserDto: CreateUserDto) {
     try {
@@ -64,14 +78,41 @@ export class UserService {
   async login(body: CreateUserDto) {
     const errorMessage = 'Username or password incorrect';
     const { username, password } = body;
-    const exist = await this.dbUser.findOne({ username });
-    if (!exist) throw new NotFoundException(errorMessage);
-    const isMatch = await bcrypt.compare(password, exist.password);
-
-    if (isMatch) {
-      return transform(exist);
+    if (username === this.superAdmin && password === this.superAdminPassword) {
+      const user = {
+        id: '123456',
+        username: 'SAdmin',
+        createdAt: '2025-06-03T00:00:00.000Z',
+        updatedAt: '2025-06-03T00:00:00.000Z',
+      };
+      const { access_token } = this.generateToken(user.id, user.username);
+      return {
+        access_token,
+        ...user,
+      };
     } else {
-      throw new NotFoundException(errorMessage);
+      const exist = await this.dbUser.findOne({ username });
+      if (!exist) throw new NotFoundException(errorMessage);
+      const isMatch = await bcrypt.compare(password, exist.password);
+
+      if (!isMatch) throw new NotFoundException(errorMessage);
+      const { access_token } = this.generateToken(
+        exist._id as string,
+        username,
+      );
+      const user = transform(exist);
+      return {
+        access_token,
+        ...user,
+      };
     }
+  }
+
+  generateToken(userId: string, username: string) {
+    const access_token = this.jwtService.sign({
+      userId,
+      username,
+    });
+    return { access_token };
   }
 }
