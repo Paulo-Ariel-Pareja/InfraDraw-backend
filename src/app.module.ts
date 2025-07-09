@@ -7,6 +7,7 @@ import { ComponentModule } from './component/component.module';
 import { BoardModule } from './board/board.module';
 import { StatsModule } from './stats/stats.module';
 import { UserModule } from './user/user.module';
+import { SequenceDiagramModule } from './sequence-diagram/sequence-diagram.module';
 import dbConfig from './config/db.config';
 import appConfig from './config/app.config';
 
@@ -27,6 +28,7 @@ import appConfig from './config/app.config';
     BoardModule,
     StatsModule,
     UserModule,
+    SequenceDiagramModule,
   ],
   controllers: [AppController],
   providers: [AppService],

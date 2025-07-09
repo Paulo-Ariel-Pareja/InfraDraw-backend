@@ -6,23 +6,23 @@ import {
 import { PaginateModel } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as dayjs from 'dayjs';
-import { CreateBoardDto } from './dto/create-board.dto';
-import { UpdateBoardDto } from './dto/update-board.dto';
-import { Board } from './entities/board.entity';
-import { transform } from './helper/board.helper';
+import { CreateSequenceDiagramDto } from './dto/create-sequence-diagram.dto';
+import { SequenceDiagram } from './entities/sequence-diagram.entity';
 import { SearchDto } from '../common/dto/search.dto';
 import { Order } from '../common/constants/order.constant';
+import { UpdateSequenceDiagramDto } from './dto/update-sequence-diagram.dto';
+import { transform } from './helper/sequence-diagram.helper';
 
 @Injectable()
-export class BoardService {
+export class SequenceDiagramService {
   constructor(
-    @InjectModel(Board.name)
-    private dbBoard: PaginateModel<Board>,
+    @InjectModel(SequenceDiagram.name)
+    private dbSequence: PaginateModel<SequenceDiagram>,
   ) {}
 
-  async create(body: CreateBoardDto) {
+  async create(body: CreateSequenceDiagramDto) {
     try {
-      const newBoard = await this.dbBoard.create(body);
+      const newBoard = await this.dbSequence.create(body);
       return transform(newBoard);
     } catch (error) {
       console.log(error);
@@ -48,49 +48,21 @@ export class BoardService {
         { description: { $regex: search || '', $options: 'i' } },
       ],
     };
-    const results = await this.dbBoard.paginate(filters, { ...options, sort });
+    const results = await this.dbSequence.paginate(filters, {
+      ...options,
+      sort,
+    });
     const { docs, page, limit, totalPages, totalDocs } = results;
-    const boards: Board[] = [];
+    const diagrams: SequenceDiagram[] = [];
     if (docs.length != 0) {
-      const boardsTransformed = docs.map((item) => {
+      const diagramsTransformed = docs.map((item) => {
         return transform(item);
       });
-      boards.push(...boardsTransformed);
+      diagrams.push(...diagramsTransformed);
     }
 
     return {
-      boards,
-      total: totalDocs,
-      page,
-      limit,
-      totalPages,
-    };
-  }
-
-  async findAllPublic(searchCriteria: SearchDto) {
-    const { search, ...options } = searchCriteria;
-
-    const filters = {
-      $or: [
-        { name: { $regex: search || '', $options: 'i' }, isPublic: true },
-        {
-          description: { $regex: search || '', $options: 'i' },
-          isPublic: true,
-        },
-      ],
-    };
-    const results = await this.dbBoard.paginate(filters, options);
-    const { docs, page, limit, totalPages, totalDocs } = results;
-    const boards: Board[] = [];
-    if (docs.length != 0) {
-      const boardsTransformed = docs.map((item) => {
-        return transform(item);
-      });
-      boards.push(...boardsTransformed);
-    }
-
-    return {
-      boards,
+      diagrams,
       total: totalDocs,
       page,
       limit,
@@ -99,15 +71,15 @@ export class BoardService {
   }
 
   async findOne(id: string) {
-    const result = await this.dbBoard.findOne({ _id: id });
-    if (!result) throw new NotFoundException(`board ${id} not found`);
+    const result = await this.dbSequence.findOne({ _id: id });
+    if (!result) throw new NotFoundException(`diagram ${id} not found`);
     return transform(result);
   }
 
-  async update(id: string, body: UpdateBoardDto) {
-    const exist = await this.dbBoard.findOne({ _id: id });
+  async update(id: string, body: UpdateSequenceDiagramDto) {
+    const exist = await this.dbSequence.findOne({ _id: id });
     if (!exist) throw new NotFoundException(`board ${id} not found`);
-    const result = await this.dbBoard.findOneAndUpdate(
+    const result = await this.dbSequence.findOneAndUpdate(
       { _id: id },
       { ...body, updatedAt: Date.now() },
       { new: true },
@@ -116,15 +88,15 @@ export class BoardService {
   }
 
   async remove(id: string) {
-    await this.dbBoard.deleteOne({ _id: id });
+    await this.dbSequence.deleteOne({ _id: id });
     return;
   }
 
   async toggle(id: string) {
-    const exist = await this.dbBoard.findOne({ _id: id });
+    const exist = await this.dbSequence.findOne({ _id: id });
     if (!exist) throw new NotFoundException(`board ${id} not found`);
     const body = { isPublic: !exist.isPublic };
-    const result = await this.dbBoard.findOneAndUpdate(
+    const result = await this.dbSequence.findOneAndUpdate(
       { _id: id },
       { ...body },
       { new: true },
@@ -132,7 +104,7 @@ export class BoardService {
     return transform(result);
   }
 
-  async boardStats() {
+  async diagramStats() {
     const limit = dayjs().subtract(7, 'days');
     const day = limit.get('d');
     const month = limit.get('M');
@@ -143,7 +115,7 @@ export class BoardService {
       .split('T')[0]
       .concat('T00:00:00.000Z');
     const dateFilter = new Date(dateWithoutTZ);
-    const results = await this.dbBoard.aggregate([
+    const results = await this.dbSequence.aggregate([
       { $match: { updatedAt: { $gte: dateFilter } } },
       {
         $group: {
@@ -166,5 +138,36 @@ export class BoardService {
         date: _id.date,
       };
     });
+  }
+
+  async findAllPublic(searchCriteria: SearchDto) {
+    const { search, order, ...options } = searchCriteria;
+
+    const filters = {
+      $or: [
+        { name: { $regex: search || '', $options: 'i' }, isPublic: true },
+        {
+          description: { $regex: search || '', $options: 'i' },
+          isPublic: true,
+        },
+      ],
+    };
+    const results = await this.dbSequence.paginate(filters, options);
+    const { docs, page, limit, totalPages, totalDocs } = results;
+    const diagrams: SequenceDiagram[] = [];
+    if (docs.length != 0) {
+      const diagramsTransformed = docs.map((item) => {
+        return transform(item);
+      });
+      diagrams.push(...diagramsTransformed);
+    }
+
+    return {
+      diagrams,
+      total: totalDocs,
+      page,
+      limit,
+      totalPages,
+    };
   }
 }
