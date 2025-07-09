@@ -69,6 +69,7 @@ src/
   ├── component/
   ├── common/
   ├── config/
+  ├── sequence-diagram/
   └── stats/
   └── user/
 ```
@@ -77,6 +78,7 @@ src/
 
 - `GET /api/board` — Listado de tableros
 - `GET /api/component` — Listado de componentes
+- `GET /api/sequence-diagram` — Listado de diagramas de sequencia
 - `GET /api/stats` — Estadísticas generales
 - `POST /api/user/login` — Autenticarse
 

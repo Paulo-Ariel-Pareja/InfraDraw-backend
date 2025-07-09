@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PaginateModel } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as dayjs from 'dayjs';
-
 import { CreateComponentDto } from './dto/create-component.dto';
 import { UpdateComponentDto } from './dto/update-component.dto';
 import { Component } from './entities/component.entity';
@@ -78,25 +77,28 @@ export class ComponentService {
     const day = limit.get('d');
     const month = limit.get('M');
     const year = limit.get('y');
-    const results = await this.dbComponent.aggregate(
-      [
-        { $match: { updatedAt: { $gte: new Date(year, month, day) } } },
-        {
-          $group: {
-            _id: {
-              date: {
-                $dateToString: {
-                  date: '$updatedAt',
-                  format: '%Y-%m-%d',
-                },
+    const dateWithLocalTZ = new Date(year, month, day);
+    const dateWithoutTZ = dateWithLocalTZ
+      .toISOString()
+      .split('T')[0]
+      .concat('T00:00:00.000Z');
+    const dateFilter = new Date(dateWithoutTZ);
+    const results = await this.dbComponent.aggregate([
+      { $match: { updatedAt: { $gte: dateFilter } } },
+      {
+        $group: {
+          _id: {
+            date: {
+              $dateToString: {
+                date: '$updatedAt',
+                format: '%Y-%m-%d',
               },
             },
-            count: { $sum: 1 },
           },
+          count: { $sum: 1 },
         },
-      ],
-      { name: 'Arquitectura Microservicios DB' },
-    );
+      },
+    ]);
     return results.map((b) => {
       const { count, _id } = b;
       return {
