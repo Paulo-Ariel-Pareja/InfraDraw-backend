@@ -25,7 +25,6 @@ export class SequenceDiagramService {
       const newBoard = await this.dbSequence.create(body);
       return transform(newBoard);
     } catch (error) {
-      console.log(error);
       throw new BadRequestException(error);
     }
   }
