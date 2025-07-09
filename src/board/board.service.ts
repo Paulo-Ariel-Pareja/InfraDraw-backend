@@ -25,7 +25,6 @@ export class BoardService {
       const newBoard = await this.dbBoard.create(body);
       return transform(newBoard);
     } catch (error) {
-      console.log(error);
       throw new BadRequestException(error);
     }
   }
