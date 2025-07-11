@@ -34,6 +34,12 @@ export class DiagramNode {
 
   @Prop({ type: DiagramNodeData, required: true })
   data: DiagramNodeData;
+
+  @Prop({ type: Number, required: false })
+  width: number;
+
+  @Prop({ type: Number, required: false })
+  height: number;
 }
 
 class DiagramEdgeData {

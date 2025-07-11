@@ -59,6 +59,14 @@ export class DiagramNode {
   @IsObject()
   @Type(() => DiagramNodeData)
   data: DiagramNodeData;
+
+  @IsOptional()
+  @IsNumber()
+  width: number;
+
+  @IsOptional()
+  @IsNumber()
+  height: number;
 }
 
 class DiagramEdgeData {
